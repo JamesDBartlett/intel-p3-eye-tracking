@@ -1,0 +1,5 @@
+.idea/
+/models/
+/test_video/
+/performance/.ipynb_checkpoints/
+__pycache__
