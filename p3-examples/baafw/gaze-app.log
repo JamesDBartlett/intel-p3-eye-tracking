@@ -71,3 +71,47 @@
 2020-06-26 19:23:00,536 [INFO] Headpose Estimation:2.8ms
 2020-06-26 19:23:00,537 [INFO] Gaze Estimation:3.3ms
 2020-06-26 19:23:00,538 [INFO] ============== End ===============================
+2020-07-18 04:21:14,003 [INFO] ============== Models Load time ===============
+2020-07-18 04:21:14,006 [ERROR] Error in inference:Path to the model models/intel/face-detection-adas-binary-0001/FP32-INT1/face-detection-adas-binary-0001.xml doesn't exists or it's a directory
+Traceback (most recent call last):
+  File "src/main.py", line 121, in infer_on_stream
+    fdnet.load_model()
+  File "/home/james/GitHub/intel-p3-eye-tracking/p3-examples/baafw/src/face_detection.py", line 31, in load_model
+    self.infer_network.load_model(self.model_xml, self.device, self.extensions)
+  File "/home/james/GitHub/intel-p3-eye-tracking/p3-examples/baafw/src/inference.py", line 60, in load_model
+    self.network = self.plugin.read_network(model=model_xml, weights=model_bin)
+  File "ie_api.pyx", line 136, in openvino.inference_engine.ie_api.IECore.read_network
+  File "ie_api.pyx", line 152, in openvino.inference_engine.ie_api.IECore.read_network
+Exception: Path to the model models/intel/face-detection-adas-binary-0001/FP32-INT1/face-detection-adas-binary-0001.xml doesn't exists or it's a directory
+2020-07-18 04:21:40,231 [INFO] ============== Models Load time ===============
+2020-07-18 04:21:40,530 [INFO] Face Detection Model: 299.2ms
+2020-07-18 04:21:40,532 [ERROR] Error in inference:Path to the model models/intel/landmarks-regression-retail-0009/FP16-Int8/landmarks-regression-retail-0009.xml doesn't exists or it's a directory
+Traceback (most recent call last):
+  File "src/main.py", line 125, in infer_on_stream
+    lmnet.load_model()
+  File "/home/james/GitHub/intel-p3-eye-tracking/p3-examples/baafw/src/facial_landmarks_detection.py", line 31, in load_model
+    self.infer_network.load_model(self.model_xml, self.device, self.extensions)
+  File "/home/james/GitHub/intel-p3-eye-tracking/p3-examples/baafw/src/inference.py", line 60, in load_model
+    self.network = self.plugin.read_network(model=model_xml, weights=model_bin)
+  File "ie_api.pyx", line 136, in openvino.inference_engine.ie_api.IECore.read_network
+  File "ie_api.pyx", line 152, in openvino.inference_engine.ie_api.IECore.read_network
+Exception: Path to the model models/intel/landmarks-regression-retail-0009/FP16-Int8/landmarks-regression-retail-0009.xml doesn't exists or it's a directory
+2020-07-18 04:24:26,720 [INFO] ============== Models Load time ===============
+2020-07-18 04:24:27,026 [INFO] Face Detection Model: 305.2ms
+2020-07-18 04:24:27,028 [ERROR] Error in inference:Path to the model ./models/intel/landmarks-regression-retail-0009/FP16-Int8/landmarks-regression-retail-0009.xml doesn't exists or it's a directory
+Traceback (most recent call last):
+  File "src/main.py", line 125, in infer_on_stream
+    lmnet.load_model()
+  File "/home/james/GitHub/intel-p3-eye-tracking/p3-examples/baafw/src/facial_landmarks_detection.py", line 31, in load_model
+    self.infer_network.load_model(self.model_xml, self.device, self.extensions)
+  File "/home/james/GitHub/intel-p3-eye-tracking/p3-examples/baafw/src/inference.py", line 60, in load_model
+    self.network = self.plugin.read_network(model=model_xml, weights=model_bin)
+  File "ie_api.pyx", line 136, in openvino.inference_engine.ie_api.IECore.read_network
+  File "ie_api.pyx", line 152, in openvino.inference_engine.ie_api.IECore.read_network
+Exception: Path to the model ./models/intel/landmarks-regression-retail-0009/FP16-Int8/landmarks-regression-retail-0009.xml doesn't exists or it's a directory
+2020-07-18 04:29:22,307 [INFO] ============== Models Load time ===============
+2020-07-18 04:29:22,582 [INFO] Face Detection Model: 274.6ms
+2020-07-18 04:29:22,705 [INFO] Facial Landmarks Detection Model: 122.3ms
+2020-07-18 04:29:22,903 [INFO] Headpose Estimation Model: 197.7ms
+2020-07-18 04:29:23,133 [INFO] Gaze Estimation Model: 230.0ms
+2020-07-18 04:29:23,133 [INFO] ==============  End =====================

@@ -67,7 +67,7 @@ def main():
     
     for file_name_key in model_path_dict.keys():
         if not os.path.isfile(model_path_dict[file_name_key]):
-            logger.error("Unable to find specified " + fileNameKey + " xml file")
+            logger.error("Unable to find specified " + file_name_key + " xml file")
             exit(1)
             
     fdm = FaceDetectionModel(model_path_dict['FaceDetectionModel'], args.device, args.cpu_extension)

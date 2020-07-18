@@ -35,8 +35,12 @@ class FaceDetectionModel:
         This method is for loading the model to the device specified by the user.
         If your model requires any Plugins, this is where you can load them.
         '''
-        self.plugin = IECore()
-        self.network = IENetwork(model=self.model_structure, weights=self.model_weights)
+        ie = IECore()
+        net = ie.read_network(model=self.model_structure, weights=self.model_weights)
+        # exec_net = ie.load_network(network=net, device_name="CPU", num_requests=1)
+
+        self.plugin = ie
+        self.network = net
         supported_layers = self.plugin.query_network(network=self.network, device_name=self.device)
         unsupported_layers = [l for l in self.network.layers.keys() if l not in supported_layers]
 

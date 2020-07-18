@@ -13,10 +13,10 @@ logging.getLogger().setLevel(logging.INFO)
 demo = 'bin/demo.mp4'
 face = 'bin/FACE0.png'
 
-face_detect = "models/face-detection-adas-binary-0001"
-gaze_estim = "models/gaze-estimation-adas-0002"
-head_pose = "models/head-pose-estimation-adas-0001"
-landmarks = "models/landmarks-regression-retail-0009"
+face_detect = "models/intel/face-detection-adas-binary-0001/FP32-INT1/face-detection-adas-binary-0001"
+gaze_estim = "models/intel/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002"
+head_pose = "models/intel/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001"
+landmarks = "models/intel/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009"
 
 
 def main(args):
