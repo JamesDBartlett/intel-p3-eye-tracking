@@ -1,12 +1,12 @@
 """
-This is a sample class for a model. You may choose to use it as-is or make any changes to it.
-This has been provided just to give you an idea of how to structure your model class.
+    face_detection.py
+    by @JamesDBartlett3
 """
 
 
-class Model_X:
+class FaceDetection:
     """
-    Class for the Face Detection Model.
+    Face Detection Class.
     """
 
     def __init__(self, model_name, device="CPU", extensions = None):

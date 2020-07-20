@@ -1,10 +1,10 @@
 """
-This is a sample class for a model. You may choose to use it as-is or make any changes to it.
-This has been provided just to give you an idea of how to structure your model class.
+    gaze_estimation.py
+    by @JamesDBartlett3
 """
 
 
-class Model_X:
+class GazeEstimation:
     """
     Class for the Face Detection Model.
     """
