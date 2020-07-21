@@ -1,10 +1,1 @@
-p3-examples/*/bin*
-p3-examples/*/img*
-p3-examples/*/intel*
-p3-examples/*/models*
-p3-examples/*/*/__pycache__/*
-*.mp4
-*.png
-*.gif
-*.xls*
-*.conf
+.vscode/*
