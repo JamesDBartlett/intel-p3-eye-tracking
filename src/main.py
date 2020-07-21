@@ -16,7 +16,7 @@ from input_feeder import InputFeeder
 
 # Import libraries I wrote
 from face_detection import FaceDetection
-from facial_landmarks_detection import FacialLandmarkDetection
+from facial_landmark_detection import FacialLandmarkDetection
 from gaze_estimation import GazeEstimation
 from head_pose_estimation import HeadPoseEstimation
 
