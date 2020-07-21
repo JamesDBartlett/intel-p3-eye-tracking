@@ -32,7 +32,7 @@ def setup_argparser():
     argparser.add_argument("-hpe", "--head_pose_estimation", required = True, type = str,
                             help = "Path to Head Pose Estimation model .xml file")
     argparser.add_argument("-i", "--input", required = False, type = str,
-                            help = "Path to input video file, or enter 'cam' for webcam feed"
+                            help = "Path to input video file, or 'webcam' for webcam feed"
                             default = "../media/demo.mp4")
     argparser.add_argument("-d", "--device", required = False, type = str, default = "CPU"
                             help = "Target device: CPU (default), GPU, FPGA, or MYRIAD")
@@ -60,9 +60,10 @@ def main():
         log.error("Error: Can't find input file")
         exit(1)
     else:
-        if inFile.lower() != "cam":
+        if inFile.lower() != "webcam":
             feeder = InputFeeder("video", inFile)
-        feeder = InputFeeder("cam")
+        else:
+            feeder = InputFeeder("webcam")
 
     models = {"FaceDetection":args.face_detection, 
             "FacialLandmarkDetection":args.facial_landmark_detection,

@@ -15,8 +15,8 @@ class InputFeeder:
     def __init__(self, input_type, input_file=None):
         """
         input_type: str, The type of input. Can be 'video' for video file, 'image' for image file,
-                    or 'cam' to use webcam feed.
-        input_file: str, The file that contains the input image or video file. Leave empty for cam input_type.
+                    or 'webcam' to use webcam feed.
+        input_file: str, The file that contains the input image or video file. Leave empty for webcam input_type.
         """
         self.input_type = input_type
         if input_type == "video" or input_type == "image":
@@ -25,7 +25,7 @@ class InputFeeder:
     def load_data(self):
         if self.input_type == "video":
             self.cap = cv2.VideoCapture(self.input_file)
-        elif self.input_type == "cam":
+        elif self.input_type == "webcam":
             self.cap = cv2.VideoCapture(0)
         else:
             self.cap = cv2.imread(self.input_file)
