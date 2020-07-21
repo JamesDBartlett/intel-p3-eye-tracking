@@ -1,11 +1,14 @@
 """
     main.py
-    by @JamesDBartlett3
+    Author: @JamesDBartlett3
 """
 
 # Import official libraries
-import cv2
 import os
+import cv2
+import sys
+import time
+import random
 import logging
 import numpy as np
 from argparse import ArgumentParser
@@ -32,15 +35,15 @@ def setup_argparser():
     argparser.add_argument("-hpe", "--head_pose_estimation", required = True, type = str,
                             help = "Path to Head Pose Estimation model .xml file")
     argparser.add_argument("-i", "--input", required = False, type = str,
-                            help = "Path to input video file, or 'webcam' for webcam feed"
+                            help = "Path to input video file, or 'webcam' for webcam feed",
                             default = "../media/demo.mp4")
-    argparser.add_argument("-d", "--device", required = False, type = str, default = "CPU"
+    argparser.add_argument("-d", "--device", required = False, type = str, default = "CPU",
                             help = "Target device: CPU (default), GPU, FPGA, or MYRIAD")
     argparser.add_argument("-c", "--cpu_extension", required = False, type = str, default = None,
                             help = "Absolute path to CPU extension library file (optional)")
     argparser.add_argument("-p", "--probability_threshold", required = False, type = float,
                             default = 0.6, help = "Threshold of model confidence, below which "
-                                                    "detections will not be counted")
+                                                    "detections will not be counted (default: 0.6)")
     argparser.add_argument("-pf", "--preview_flags", required = False, nargs = '+',
                             default = [], help = "Flags to enable visual output for each of the " 
                                                 "models in the stack, space-delimited."
@@ -51,17 +54,17 @@ def setup_argparser():
 def main():
     
     args = setup_argparser().parse_args()
-    pFlags = args.preview_flags
+    p_flags = args.preview_flags
 
     log = logging.getLogger()
-    inFile = args.input
+    in_file = args.input
     feeder = None
-    if not os.path.exists(inFile):
+    if not os.path.exists(in_file):
         log.error("Error: Can't find input file")
         exit(1)
     else:
-        if inFile.lower() != "webcam":
-            feeder = InputFeeder("video", inFile)
+        if in_file.lower() != "webcam":
+            feeder = InputFeeder("video", in_file)
         else:
             feeder = InputFeeder("webcam")
 
@@ -72,7 +75,7 @@ def main():
 
     for m in models.keys():
         if not os.path.exists(models[m]):
-            logger.error("Can't find model: " + m + " Please double-check file paths.")
+            log.error("Can't find model: " + m + " Please double-check file paths.")
             exit(1)
     
     fd = FaceDetection(m["FaceDetection"], args.device, args.cpu_extension)

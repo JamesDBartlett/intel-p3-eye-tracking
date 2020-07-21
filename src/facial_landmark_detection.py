@@ -1,6 +1,6 @@
 """
     facial_landmark_detection.py
-    by @JamesDBartlett3
+    Author: @JamesDBartlett3
 """
 
 

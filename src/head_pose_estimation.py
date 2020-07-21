@@ -1,6 +1,6 @@
 """
     head_pose_estimation.py
-    by @JamesDBartlett3
+    Author: @JamesDBartlett3
 """
 
 
