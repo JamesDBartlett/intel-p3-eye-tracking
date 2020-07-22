@@ -9,8 +9,8 @@ import cv2
 import sys
 import time
 import random
-import logging
 import numpy as np
+import logging
 from argparse import ArgumentParser
 
 # Import Udacity-provided libraries
@@ -44,49 +44,91 @@ def setup_argparser():
     argparser.add_argument("-p", "--probability_threshold", required = False, type = float,
                             default = 0.6, help = "Threshold of model confidence, below which "
                                                     "detections will not be counted (default: 0.6)")
-    argparser.add_argument("-pf", "--preview_flags", required = False, nargs = '+',
-                            default = [], help = "Flags to enable visual output for each of the " 
-                                                "models in the stack, space-delimited."
-                                                "Valid options: fd fld ge hpe")
+    argparser.add_argument("-l", "--logfile", type = str, default = None, required = False,
+                            help = "Specify logfile name. Default behavior is no logging.")
+    argparser.add_argument("-oi", "--overlay_inference", default = False, required = False,
+                            help = "Overlay inference output on video", action = "store_true")
+    argparser.add_argument("-mc", "--mouse_control", default = False, required = False,
+                            help = "Allow application to control mouse cursor", action = "store_true")
+    argparser.add_argument("-vw", "--video_window", default = False, required = False,
+                            help = "Live stream output video in a window", action = "store_true")
     return argparser
 
 
-def main():
-    
-    args = setup_argparser().parse_args()
-    p_flags = args.preview_flags
+def run_inference(args):
+    """
+        Take args input from main, run inference on input video, and display/save output video
+    """
 
-    log = logging.getLogger()
-    in_file = args.input
-    feeder = None
-    if not os.path.exists(in_file):
-        log.error("Error: Can't find input file")
-        exit(1)
+    def run(args):
+        print(args)
+
+    
+    if isinstance(args.logfile, str):
+        print("Logfile: " + args.logfile)
+        try:
+            logging.basicConfig(
+                level = logging.INFO,
+                format = "%(levelname)s :: %(message)s (%(asctime)s)",
+                handlers = [logging.FileHandler(args.logfile), logging.StreamHandler()]
+            )
+            run(args)
+        except Exception as e:
+            logging.exception("Error:" + str(e))
+            # print("Logfile: " + args.logfile)
+
     else:
-        if in_file.lower() != "webcam":
-            feeder = InputFeeder("video", in_file)
-        else:
-            feeder = InputFeeder("webcam")
+        print("Logging disabled.")
+        run(args)
 
-    models = {"FaceDetection":args.face_detection, 
-            "FacialLandmarkDetection":args.facial_landmark_detection,
-            "GazeEstimation":args.gaze_estimation,
-            "HeadPoseEstimation":args.head_pose_estimation}
 
-    for m in models.keys():
-        if not os.path.exists(models[m]):
-            log.error("Can't find model: " + m + " Please double-check file paths.")
-            exit(1)
-    
-    fd = FaceDetection(m["FaceDetection"], args.device, args.cpu_extension)
-    fld = FacialLandmarkDetection(m["FacialLandmarkDetection"], args.device, args.cpu_extension)
-    ge = GazeEstimation(m["GazeEstimation"], args.device, args.cpu_extension)
-    hpe = HeadPoseEstimation(m["HeadPoseEstimation"], args.device, args.cpu_extension)
+    # logger = log.getLogger()
+    # in_file = args.input
+    # feeder = None
+    # if not os.path.exists(in_file):
+    #     logger.error("Error: Can't find input file")
+    #     exit(1)
+    # else:
+    #     if in_file.lower() != "webcam":
+    #         feeder = InputFeeder("video", in_file)
+    #     else:
+    #         feeder = InputFeeder("webcam")
 
-    mc = MouseController("medium", "slow")
+    # models = {"FaceDetection":args.face_detection, 
+    #         "FacialLandmarkDetection":args.facial_landmark_detection,
+    #         "GazeEstimation":args.gaze_estimation,
+    #         "HeadPoseEstimation":args.head_pose_estimation}
 
-    feeder.load_data()
-    fd.load_model()
-    fld.load_model()
-    hpe.load_model()
-    ge.load_model() 
+    # for m in models.keys():
+    #     if not os.path.exists(models[m]):
+    #         log.error("Can't find model: " + m + " Please double-check file paths.")
+    #         exit(1)
+
+    # fd = FaceDetection(m["FaceDetection"], args.device, args.cpu_extension)
+    # fld = FacialLandmarkDetection(m["FacialLandmarkDetection"], args.device, args.cpu_extension)
+    # ge = GazeEstimation(m["GazeEstimation"], args.device, args.cpu_extension)
+    # hpe = HeadPoseEstimation(m["HeadPoseEstimation"], args.device, args.cpu_extension)
+
+    # mc = MouseController("medium", "slow")
+
+    # feeder.load_data()
+    # fd.load_model()
+    # fld.load_model()
+    # hpe.load_model()
+    # ge.load_model() 
+
+
+
+
+
+
+def main():
+    """
+        Get args from input & pass them to run_inference()
+    """
+    args = setup_argparser().parse_args()
+    run_inference(args)
+
+
+if __name__ == "__main__":
+    main()
