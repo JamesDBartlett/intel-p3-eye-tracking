@@ -134,7 +134,33 @@ def run_inference(args):
     )
 
     def infer(args):
-        print(args)
+
+        def now():
+            return time.time()
+
+        mouse_control = MouseController("medium","slow")
+        face_detection = FaceDetection(args.face_detection)
+        facial_landmark_detection = FacialLandmarkDetection(args.facial_landmark_detection)
+        gaze_estimation = GazeEstimation(args.gaze_estimation)
+        head_pose_detection = HeadPoseEstimation(args.head_pose_detection)
+
+        logging.info("--------------------------------------------")
+        logging.info("========= Model Loading Times (ms) =========")
+        start = now()
+        face_detection.load_model()
+        logging.info("Face Detection: {:.2f}".format((now() - start)) / 0.001)
+        start = now()
+        facial_landmark_detection.load_model()
+        logging.info("Facial Landmark Detection: {:.2f}".format((now() - start)) / 0.001)
+        start = now()
+        gaze_estimation.load_model()
+        logging.info("Gaze Estimation: {:.2f}".format((now() - start)) / 0.001)
+        start = now()
+        head_pose_detection.load_model()
+        logging.info("Head Pose Detection: {:.2f}".format((now() - start)) / 0.001)
+
+        feeder = InputFeeder("video", args.input)
+        feeder.load_data()
 
     if len(args.logfile) > 0:
         print("Logfile: " + args.logfile)
