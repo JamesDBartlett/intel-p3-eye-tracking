@@ -23,7 +23,6 @@ from facial_landmark_detection import FacialLandmarkDetection
 from gaze_estimation import GazeEstimation
 from head_pose_estimation import HeadPoseEstimation
 
-
 def setup_argparser():
     argparser = ArgumentParser()
     argparser.add_argument("-fd", "--face_detection", required = True, type = str,
@@ -44,7 +43,7 @@ def setup_argparser():
     argparser.add_argument("-p", "--probability_threshold", required = False, type = float,
                             default = 0.6, help = "Threshold of model confidence, below which "
                                                     "detections will not be counted (default: 0.6)")
-    argparser.add_argument("-l", "--logfile", type = str, default = None, required = False,
+    argparser.add_argument("-l", "--logfile", type = str, default = "", required = False,
                             help = "Specify logfile name. Default behavior is no logging.")
     argparser.add_argument("-oi", "--overlay_inference", default = False, required = False,
                             help = "Overlay inference output on video", action = "store_true")
@@ -59,27 +58,28 @@ def run_inference(args):
     """
         Take args input from main, run inference on input video, and display/save output video
     """
+    logging.basicConfig(
+        level = logging.INFO,
+        format = "[%(asctime)s] %(levelname)s: %(message)s",
+        datefmt = "%Y-%m-%d %H:%M:%S %Z",
+        handlers = [logging.FileHandler(args.logfile), logging.StreamHandler()]
+    )
 
-    def run(args):
+    def infer(args):
         print(args)
 
     
-    if isinstance(args.logfile, str):
+    if len(args.logfile) > 0:
         print("Logfile: " + args.logfile)
-        try:
-            logging.basicConfig(
-                level = logging.INFO,
-                format = "%(levelname)s :: %(message)s (%(asctime)s)",
-                handlers = [logging.FileHandler(args.logfile), logging.StreamHandler()]
-            )
-            run(args)
-        except Exception as e:
-            logging.exception("Error:" + str(e))
-            # print("Logfile: " + args.logfile)
 
+        logging.info("Nothing to log.")
+        try:
+            infer(args)
+        except Exception as e:
+            logging.exception(str(e))
     else:
-        print("Logging disabled.")
-        run(args)
+        print("Logging disabled. To enable logging, use the '--logfile' argument.")
+        infer(args)
 
 
 
