@@ -82,43 +82,6 @@ def run_inference(args):
         run(args)
 
 
-    # logger = log.getLogger()
-    # in_file = args.input
-    # feeder = None
-    # if not os.path.exists(in_file):
-    #     logger.error("Error: Can't find input file")
-    #     exit(1)
-    # else:
-    #     if in_file.lower() != "webcam":
-    #         feeder = InputFeeder("video", in_file)
-    #     else:
-    #         feeder = InputFeeder("webcam")
-
-    # models = {"FaceDetection":args.face_detection, 
-    #         "FacialLandmarkDetection":args.facial_landmark_detection,
-    #         "GazeEstimation":args.gaze_estimation,
-    #         "HeadPoseEstimation":args.head_pose_estimation}
-
-    # for m in models.keys():
-    #     if not os.path.exists(models[m]):
-    #         log.error("Can't find model: " + m + " Please double-check file paths.")
-    #         exit(1)
-
-    # fd = FaceDetection(m["FaceDetection"], args.device, args.cpu_extension)
-    # fld = FacialLandmarkDetection(m["FacialLandmarkDetection"], args.device, args.cpu_extension)
-    # ge = GazeEstimation(m["GazeEstimation"], args.device, args.cpu_extension)
-    # hpe = HeadPoseEstimation(m["HeadPoseEstimation"], args.device, args.cpu_extension)
-
-    # mc = MouseController("medium", "slow")
-
-    # feeder.load_data()
-    # fd.load_model()
-    # fld.load_model()
-    # hpe.load_model()
-    # ge.load_model() 
-
-
-
 
 
 
