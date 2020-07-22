@@ -1,18 +1,23 @@
 # Computer Pointer Controller
 
-*TODO:* Write a short introduction to your project
+Computer-Human Interface Peripheral Signal Manipulation via AI Retina Tracking (CHIPSMART)
 
 ## Project Set Up and Installation
-*TODO:* Explain the setup procedures to run your project. For instance, this can include your project directory structure, the models you need to download and where to place them etc. Also include details about how to install the dependencies your project requires.
+Requires:
+- Ubuntu Linux Version 18.04
+- Python 3.7.6
+- OpenVINO Version 2020.3.194
+- This repository, cloned to a local directory
 
 ## Demo
-*TODO:* Explain how to run a basic demo of your model.
+To run this project, simply execute the script titled `run.sh` in the root directory of this repository:
+`> ./run.sh`
 
 ## Documentation
-*TODO:* Include any documentation that users might need to better understand your project code. For instance, this is a good place to explain the command line arguments that your project supports.
+This readme file
 
 ## Benchmarks
-*TODO:* Include the benchmark results of running your model on multiple hardwares and multiple model precisions. Your benchmarks can include: model loading time, input/output processing time, model inference time etc.
+I only have an Intel Core i3 CPU
 
 ## Results
 *TODO:* Discuss the benchmark results and explain why you are getting the results you are getting. For instance, explain why there is difference in inference time for FP32, FP16 and INT8 models.
