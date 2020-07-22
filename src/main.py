@@ -159,8 +159,43 @@ def run_inference(args):
         head_pose_detection.load_model()
         logging.info("Head Pose Detection: {:.2f}".format((now() - start)) / 0.001)
 
+        # TODO: Add total load time
+
+        logging.info("--------------------------------------------")
+        logging.info("                                            ")
+
         feeder = InputFeeder("video", args.input)
         feeder.load_data()
+
+        frame_count = 0
+        fd_time = 0
+        fld_time = 0
+        ge_time = 0
+        hp_time = 0
+        loop = True
+
+        while loop:
+            try:
+                frame = next(feeder.next_batch())
+
+            except StopIteration:
+                break
+
+            key = cv2.waitKey(30)
+            frame_count += 1
+
+            preprocessed_frame = face_detection.preprocess_input(frame)
+            inf_start = now()
+            fd_output = face_detection.predict(preprocessed_frame)
+            inf_end = now()
+            fd_time += inf_end - inf_start
+            out_frame, face_boxes = face_detection.preprocess_output(fd_output, frame, args.overlay_inference)
+
+            for box in face_boxes:
+                break
+            if key == 27:
+                break
+
 
     if len(args.logfile) > 0:
         print("Logfile: " + args.logfile)
