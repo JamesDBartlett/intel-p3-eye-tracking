@@ -146,22 +146,21 @@ def run_inference(args):
 
         logging.info("--------------------------------------------")
         logging.info("========= Model Loading Times (ms) =========")
-        start = now()
+        load_start = now()
         face_detection.load_model()
-        logging.info("Face Detection: {:.2f}".format((now() - start)) / 0.001)
-        start = now()
+        logging.info("Face Detection: {:.2f}".format((now() - load_start)) / 0.001)
+        fld_start = now()
         facial_landmark_detection.load_model()
-        logging.info("Facial Landmark Detection: {:.2f}".format((now() - start)) / 0.001)
-        start = now()
+        logging.info("Facial Landmark Detection: {:.2f}".format((now() - fld_start)) / 0.001)
+        ge_start = now()
         gaze_estimation.load_model()
-        logging.info("Gaze Estimation: {:.2f}".format((now() - start)) / 0.001)
-        start = now()
+        logging.info("Gaze Estimation: {:.2f}".format((now() - ge_start)) / 0.001)
+        hpd_start = now()
         head_pose_detection.load_model()
-        logging.info("Head Pose Detection: {:.2f}".format((now() - start)) / 0.001)
-
-        # TODO: Add total load time
-
-        logging.info("--------------------------------------------")
+        logging.info("Head Pose Detection: {:.2f}".format((now() - hpd_start)) / 0.001)
+        logging.info("____________________________________________")
+        logging.info("Total Loading Time (All Models): {:.2f}".format((now() - load_start)) / 0.001)
+        logging.info("============================================")
         logging.info("                                            ")
 
         feeder = InputFeeder("video", args.input)
@@ -192,6 +191,13 @@ def run_inference(args):
             out_frame, face_boxes = face_detection.preprocess_output(fd_output, frame, args.overlay_inference)
 
             for box in face_boxes:
+                detected_face = frame[box[1]:box[3],box[0]:box[2]]
+                preprocessed_frame = facial_landmark_detection.preprocess_input(detected_face)
+                fld_start = now()
+                fld_output = facial_landmark_detection.predict(preprocessed_frame)
+                fld_time += now() - fld_start
+                out_frame, l_eye, r_eye = facial_landmark_detection.preprocess_output(fld_output)
+
                 break
             if key == 27:
                 break
