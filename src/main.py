@@ -126,34 +126,76 @@ def now():
     return time.time()
 
 
-def infer(args):
+def log_model_load_times(logging_enabled, load_start, fl_start, ge_start, hp_start):
+    """
+        if logging is enabled, log the model loading times
+    """
+    if logging_enabled:
+        logging.info("--------------------------------------------")
+        logging.info("========= Model Loading Times (ms) =========")
+        logging.info("Face Detection: {:.2f}".format((now() - load_start)) / 0.001)
+        logging.info(
+            "Facial Landmark Detection: {:.2f}".format((now() - fl_start)) / 0.001
+        )
+        logging.info("Gaze Estimation: {:.2f}".format((now() - ge_start)) / 0.001)
+        logging.info("Head Pose Estimation: {:.2f}".format((now() - hp_start)) / 0.001)
+        logging.info("____________________________________________")
+        logging.info(
+            "Total Loading Time (All Models): {:.2f}".format((now() - load_start))
+            / 0.001
+        )
+        logging.info("============================================")
+        logging.info("                                            ")
 
+
+def log_inference_times(
+    logging_enabled, frame_count, fd_time, fl_time, ge_time, hp_time
+):
+    """
+        if logging is enabled and frame count is greater than 0, log the inference times
+    """
+    if logging_enabled and frame_count > 0:
+        logging.info("----------------------------------------------")
+        logging.info("========= Model Inference Times (ms) =========")
+        logging.info("Face Detection: {:.2f}".format((fd_time / frame_count) / 0.001))
+        logging.info(
+            "Facial Landmark Detection: {:.2f}".format((fl_time / frame_count) / 0.001)
+        )
+        logging.info("Gaze Estimation: {:.2f}".format((ge_time / frame_count) / 0.001))
+        logging.info(
+            "Head Pose Estimation: {:.2f}".format((hp_time / frame_count) / 0.001)
+        )
+        logging.info("============================================")
+
+
+def user_quit(logging_enabled):
+    """
+        if logging is enabled, log the user_quit message.
+    """    
+    if(logging_enabled):
+        logging.info("User pressed Esc or Q key. Quitting...")
+
+
+def infer(args, logging_enabled):
+    """
+        run inference on input video, display/save output video
+    """
     mouse_control = MouseController("medium", "slow")
     face_detection = FaceDetection(args.face_detection)
     facial_landmark_detection = FacialLandmarkDetection(args.facial_landmark_detection)
     gaze_estimation = GazeEstimation(args.gaze_estimation)
-    head_pose_detection = HeadPoseEstimation(args.head_pose_detection)
+    head_pose_estimation = HeadPoseEstimation(args.head_pose_estimation)
 
-    logging.info("--------------------------------------------")
-    logging.info("========= Model Loading Times (ms) =========")
     load_start = now()
     face_detection.load_model()
-    logging.info("Face Detection: {:.2f}".format((now() - load_start)) / 0.001)
     fl_start = now()
     facial_landmark_detection.load_model()
-    logging.info("Facial Landmark Detection: {:.2f}".format((now() - fl_start)) / 0.001)
     ge_start = now()
     gaze_estimation.load_model()
-    logging.info("Gaze Estimation: {:.2f}".format((now() - ge_start)) / 0.001)
-    hpd_start = now()
-    head_pose_detection.load_model()
-    logging.info("Head Pose Detection: {:.2f}".format((now() - hpd_start)) / 0.001)
-    logging.info("____________________________________________")
-    logging.info(
-        "Total Loading Time (All Models): {:.2f}".format((now() - load_start)) / 0.001
-    )
-    logging.info("============================================")
-    logging.info("                                            ")
+    hp_start = now()
+    head_pose_estimation.load_model()
+
+    log_model_load_times(logging_enabled, load_start, fl_start, ge_start, hp_start)
 
     feeder = InputFeeder("video", args.input)
     feeder.load_data()
@@ -176,7 +218,7 @@ def infer(args):
         fd_frame = face_detection.preprocess_input(F)
         inf_start = now()
         fd_output = face_detection.predict(fd_frame)
-        
+
         fd_time += inf_end - inf_start
         out_frame, faces = face_detection.preprocess_output(
             fd_output, F, args.overlay_inference
@@ -196,11 +238,11 @@ def infer(args):
             )
 
             # Head Pose Estimation
-            hp_frame = head_pose_detection.preprocess_input(detected_face)
+            hp_frame = head_pose_estimation.preprocess_input(detected_face)
             hp_start = now()
-            hp_output = head_pose_detection.predict(hp_frame)
+            hp_output = head_pose_estimation.predict(hp_frame)
             hp_time += now() - hp_start
-            out_frame, head_pose = head_pose_detection.preprocess_output(
+            out_frame, head_pose = head_pose_estimation.preprocess_output(
                 hp_output, out_frame, detected_face, B, args.overlay_inference
             )
 
@@ -215,6 +257,8 @@ def infer(args):
                 ge_output, B, l_coord, r_coord, args.overlay_inference
             )
 
+            inf_end = now()
+
             if args.mouse_control:
                 mouse_control.move(g_vec[0], g_vec[1])
 
@@ -222,22 +266,24 @@ def infer(args):
                 cv2.imshow("C.H.I.P.S.M.A.R.T.", out_frame)
 
             break
-        
-        inf_end = now()
 
         # Quit if user presses Esc or Q
         if key in (27, 81):
+            user_quit(logging_enabled)
             break
 
-    if(frame_count > 0):
-        logging.info("----------------------------------------------")
-        logging.info("========= Model Inference Times (ms) =========")
-        logging.info("Face Detection: {:.2f}".format((fd_time / frame_count) / 0.001))
+    log_inference_times(
+        logging_enabled, frame_count, fd_time, fl_time, ge_time, hp_time
+    )
+
+    feeder.close()
+    cv2.destroyAllWindows()
+    quit()
 
 
 def run_inference(args):
     """
-        Take args input from main, run inference on input video, and display/save output video
+        Take args input from main, enable/disable logging, pass args to infer()
     """
     logging.basicConfig(
         level=logging.INFO,
@@ -248,15 +294,13 @@ def run_inference(args):
 
     if len(args.logfile) > 0:
         print("Logfile: " + args.logfile)
-
-        logging.info("Nothing to log.")
         try:
-            infer(args)
+            infer(args, logging_enabled=True)
         except Exception as e:
             logging.exception(str(e))
     else:
         print("Logging disabled. To enable logging, use the '--logfile' argument.")
-        infer(args)
+        infer(args, logging_enabled=False)
 
 
 def main():
@@ -264,6 +308,7 @@ def main():
         Get args from input & pass them to run_inference()
     """
     args = setup_argparser().parse_args()
+
     run_inference(args)
 
 
