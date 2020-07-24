@@ -10,6 +10,7 @@
 import cv2
 from numpy import ndarray
 
+# CAN NUMPY IMPORT BE REMOVED?
 
 class InputFeeder:
     def __init__(self, input_type, input_file=None):
