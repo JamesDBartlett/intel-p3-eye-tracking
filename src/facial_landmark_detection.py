@@ -7,9 +7,10 @@ import time
 import numpy as np
 from inference import Network
 
+
 class FacialLandmarkDetection:
     """
-    Facial Landmark Detection Class
+        Facial Landmark Detection Class
     """
 
     def __init__(self, model_name, device="CPU", extensions = None):
