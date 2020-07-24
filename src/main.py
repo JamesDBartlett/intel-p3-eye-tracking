@@ -34,7 +34,7 @@ def setup_argparser():
         help="Path to Face Detection model .xml file",
     )
     argparser.add_argument(
-        "-fld",
+        "-fl",
         "--facial_landmark_detection",
         required=True,
         type=str,
@@ -48,7 +48,7 @@ def setup_argparser():
         help="Path to Gaze Estimation model .xml file",
     )
     argparser.add_argument(
-        "-hpe",
+        "-hp",
         "--head_pose_estimation",
         required=True,
         type=str,
@@ -71,7 +71,7 @@ def setup_argparser():
         help="Target device: CPU (default), GPU, FPGA, or MYRIAD",
     )
     argparser.add_argument(
-        "-c",
+        "-ce",
         "--cpu_extension",
         required=False,
         type=str,
@@ -79,7 +79,7 @@ def setup_argparser():
         help="Absolute path to CPU extension library file (optional)",
     )
     argparser.add_argument(
-        "-p",
+        "-pt",
         "--probability_threshold",
         required=False,
         type=float,
@@ -88,7 +88,7 @@ def setup_argparser():
         "detections will not be counted (default: 0.6)",
     )
     argparser.add_argument(
-        "-l",
+        "-lf",
         "--logfile",
         type=str,
         default="",
@@ -122,6 +122,119 @@ def setup_argparser():
     return argparser
 
 
+def now():
+    return time.time()
+
+
+def infer(args):
+
+    mouse_control = MouseController("medium", "slow")
+    face_detection = FaceDetection(args.face_detection)
+    facial_landmark_detection = FacialLandmarkDetection(args.facial_landmark_detection)
+    gaze_estimation = GazeEstimation(args.gaze_estimation)
+    head_pose_detection = HeadPoseEstimation(args.head_pose_detection)
+
+    logging.info("--------------------------------------------")
+    logging.info("========= Model Loading Times (ms) =========")
+    load_start = now()
+    face_detection.load_model()
+    logging.info("Face Detection: {:.2f}".format((now() - load_start)) / 0.001)
+    fl_start = now()
+    facial_landmark_detection.load_model()
+    logging.info("Facial Landmark Detection: {:.2f}".format((now() - fl_start)) / 0.001)
+    ge_start = now()
+    gaze_estimation.load_model()
+    logging.info("Gaze Estimation: {:.2f}".format((now() - ge_start)) / 0.001)
+    hpd_start = now()
+    head_pose_detection.load_model()
+    logging.info("Head Pose Detection: {:.2f}".format((now() - hpd_start)) / 0.001)
+    logging.info("____________________________________________")
+    logging.info(
+        "Total Loading Time (All Models): {:.2f}".format((now() - load_start)) / 0.001
+    )
+    logging.info("============================================")
+    logging.info("                                            ")
+
+    feeder = InputFeeder("video", args.input)
+    feeder.load_data()
+
+    frame_count, fd_time, fl_time, ge_time, hp_time = [0] * 5
+
+    loop = True
+
+    while loop:
+        try:
+            F = next(feeder.next_batch())
+
+        except StopIteration:
+            break
+
+        key = cv2.waitKey(100)
+
+        frame_count += 1
+
+        fd_frame = face_detection.preprocess_input(F)
+        inf_start = now()
+        fd_output = face_detection.predict(fd_frame)
+        
+        fd_time += inf_end - inf_start
+        out_frame, faces = face_detection.preprocess_output(
+            fd_output, F, args.overlay_inference
+        )
+
+        # TODO: trash FOR loop by accessing first element in "faces" directly
+        for B in faces:
+            detected_face = F[B[1] : B[3], B[0] : B[2]]
+
+            # Facial Landmark Detection
+            fl_frame = facial_landmark_detection.preprocess_input(detected_face)
+            fl_start = now()
+            fl_output = facial_landmark_detection.predict(fl_frame)
+            fl_time += now() - fl_start
+            out_frame, l_coord, r_coord, = facial_landmark_detection.preprocess_output(
+                fl_output, B, out_frame, args.overlay_inference
+            )
+
+            # Head Pose Estimation
+            hp_frame = head_pose_detection.preprocess_input(detected_face)
+            hp_start = now()
+            hp_output = head_pose_detection.predict(hp_frame)
+            hp_time += now() - hp_start
+            out_frame, head_pose = head_pose_detection.preprocess_output(
+                hp_output, out_frame, detected_face, B, args.overlay_inference
+            )
+
+            # Gaze Estimation
+            ge_frame, l_eye, r_eye = gaze_estimation.preprocess_input(
+                ge_frame, l_coord, r_coord, args.overlay_inference
+            )
+            ge_start = now()
+            ge_output = gaze_estimation.predict(l_eye, r_eye, head_pose)
+            ge_time += now() - ge_start
+            out_frame, g_vec = gaze_estimation.preprocess_output(
+                ge_output, B, l_coord, r_coord, args.overlay_inference
+            )
+
+            if args.mouse_control:
+                mouse_control.move(g_vec[0], g_vec[1])
+
+            if args.video_window:
+                cv2.imshow("C.H.I.P.S.M.A.R.T.", out_frame)
+
+            break
+        
+        inf_end = now()
+
+        # Quit if user presses Esc or Q
+        if key in (27, 81):
+            break
+
+    if(frame_count > 0):
+        logging.info("----------------------------------------------")
+        logging.info("========= Model Inference Times (ms) =========")
+        logging.info("Face Detection: {:.2f}".format((fd_time / frame_count) / 0.001))
+
+
 def run_inference(args):
     """
         Take args input from main, run inference on input video, and display/save output video
@@ -132,76 +245,6 @@ def run_inference(args):
         datefmt="%Y-%m-%d %H:%M:%S %Z",
         handlers=[logging.FileHandler(args.logfile), logging.StreamHandler()],
     )
-
-    def infer(args):
-
-        def now():
-            return time.time()
-
-        mouse_control = MouseController("medium","slow")
-        face_detection = FaceDetection(args.face_detection)
-        facial_landmark_detection = FacialLandmarkDetection(args.facial_landmark_detection)
-        gaze_estimation = GazeEstimation(args.gaze_estimation)
-        head_pose_detection = HeadPoseEstimation(args.head_pose_detection)
-
-        logging.info("--------------------------------------------")
-        logging.info("========= Model Loading Times (ms) =========")
-        load_start = now()
-        face_detection.load_model()
-        logging.info("Face Detection: {:.2f}".format((now() - load_start)) / 0.001)
-        fld_start = now()
-        facial_landmark_detection.load_model()
-        logging.info("Facial Landmark Detection: {:.2f}".format((now() - fld_start)) / 0.001)
-        ge_start = now()
-        gaze_estimation.load_model()
-        logging.info("Gaze Estimation: {:.2f}".format((now() - ge_start)) / 0.001)
-        hpd_start = now()
-        head_pose_detection.load_model()
-        logging.info("Head Pose Detection: {:.2f}".format((now() - hpd_start)) / 0.001)
-        logging.info("____________________________________________")
-        logging.info("Total Loading Time (All Models): {:.2f}".format((now() - load_start)) / 0.001)
-        logging.info("============================================")
-        logging.info("                                            ")
-
-        feeder = InputFeeder("video", args.input)
-        feeder.load_data()
-
-        frame_count = 0
-        fd_time = 0
-        fld_time = 0
-        ge_time = 0
-        hp_time = 0
-        loop = True
-
-        while loop:
-            try:
-                frame = next(feeder.next_batch())
-
-            except StopIteration:
-                break
-
-            key = cv2.waitKey(30)
-            frame_count += 1
-
-            preprocessed_frame = face_detection.preprocess_input(frame)
-            inf_start = now()
-            fd_output = face_detection.predict(preprocessed_frame)
-            inf_end = now()
-            fd_time += inf_end - inf_start
-            out_frame, face_boxes = face_detection.preprocess_output(fd_output, frame, args.overlay_inference)
-
-            for box in face_boxes:
-                detected_face = frame[box[1]:box[3],box[0]:box[2]]
-                preprocessed_frame = facial_landmark_detection.preprocess_input(detected_face)
-                fld_start = now()
-                fld_output = facial_landmark_detection.predict(preprocessed_frame)
-                fld_time += now() - fld_start
-                out_frame, l_eye, r_eye = facial_landmark_detection.preprocess_output(fld_output)
-
-                break
-            if key == 27:
-                break
-
 
     if len(args.logfile) > 0:
         print("Logfile: " + args.logfile)
