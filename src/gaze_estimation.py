@@ -17,28 +17,34 @@ class GazeEstimation:
         """
             set instance variables
         """
-        raise NotImplementedError
+        self.model_xml = model_name
+        self.device = device
+        self.extensions = extensions
+        self.infer_network = Network()
 
     def load_model(self):
         """
             loading the model specified by the user to the device
         """
-        raise NotImplementedError
+        self.infer_network.load_model(self.model_xml, self.device, self.extensions)
 
     def predict(self, image):
         """
             run predictions on the input image
         """
-        raise NotImplementedError
+        self.infer_network.exec_net(image)
+        if self.infer_network.wait() == 0:
+            return self.infer_network.get_output()[self.infer_network.out_blob]
 
     def check_model(self):
         raise NotImplementedError
 
-    def preprocess_input(self, image):
+    def preprocess_input(self, frame, face, l_coords, r_coords, overlay_inference):
         """
             preprocess input image
         """
-        raise NotImplementedError
+        l_shape = r_shape = [1,3,60,60]
+        
 
     def preprocess_output(self, outputs):
         """
