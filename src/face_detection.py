@@ -2,6 +2,10 @@
     face_detection.py
     Author: @JamesDBartlett3
 """
+import cv2
+import time
+import numpy as np
+from inference import Network
 
 
 class FaceDetection:
@@ -9,7 +13,7 @@ class FaceDetection:
     Face Detection Class.
     """
 
-    def __init__(self, model_name, device="CPU", extensions = None):
+    def __init__(self, model_name, device="CPU", extensions=None):
         """
         TODO: Use this to set your instance variables.
         """
