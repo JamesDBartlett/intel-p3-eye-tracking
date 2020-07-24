@@ -10,7 +10,7 @@ from inference import Network
 
 class FaceDetection:
     """
-    Face Detection Class.
+        Face Detection Class
     """
 
     def now():
