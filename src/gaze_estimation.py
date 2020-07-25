@@ -9,13 +9,12 @@ from inference import Network
 from utility import color, axes_misc
 
 
-def print_coords(img, axis_name, axis_value, color, probability_threshold):
+def print_coords(img, axis_name, axis_value, color):
     cv2.putText(
         img,
         axis_name + str("{:.1f}".format(axis_value * axes_misc[axis_name][1])),
         (15, axes_misc[axis_name][0]),
         0,
-        probability_threshold,
         color,
         1,
     )
@@ -93,7 +92,6 @@ class GazeEstimation:
         l_coords,
         r_coords,
         overlay_inference,
-        probability_threshold,
     ):
         """
             preprocess output image
@@ -111,7 +109,7 @@ class GazeEstimation:
                 for j in axes_misc.keys():
                     for k in color.keys():
                         print_coords(
-                            img, axes_misc[j], axis, color[k], probability_threshold
+                            img, axes_misc[j], axis, color[k]
                         )
                 cv2.arrowedLine(
                     img,

@@ -32,9 +32,9 @@ class FaceDetection:
         """
             run predictions on the input image
         """
-        self.infer_network.exec_net(image)
+        self.infer_network.exec_network(image)
         if self.infer_network.wait() == 0:
-            return self.infer_network.get_output()[self.infer_network.out_blob]
+            return (self.infer_network.get_output())[self.infer_network.output_blob]
 
     def check_model(self):
         raise NotImplementedError
@@ -50,7 +50,7 @@ class FaceDetection:
         frame = frame.reshape(1, *frame.shape)
         return frame
 
-    def preprocess_output(self, outputs, img, overlay_inference, probability_threshold):
+    def preprocess_output(self, outputs, img, overlay_inference, probability_threshold = 0.5):
         """
             preprocess output image
         """

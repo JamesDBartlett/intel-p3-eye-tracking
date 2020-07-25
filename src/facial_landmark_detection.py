@@ -51,7 +51,7 @@ class FacialLandmarkDetection:
         frame = frame.reshape(1, *frame.shape)
         return frame
 
-    def preprocess_output(self, outputs, box, img, overlay_inference, probability_threshold):
+    def preprocess_output(self, outputs, box, img, overlay_inference):
         """
             preprocess output image
         """

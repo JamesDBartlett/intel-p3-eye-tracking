@@ -8,7 +8,6 @@ import os
 import cv2
 import sys
 import time
-import random
 import numpy as np
 import logging
 from argparse import ArgumentParser
@@ -217,11 +216,9 @@ def infer(args, logging_enabled):
         fd_frame = face_detection.preprocess_input(F)
         inf_start = now()
         fd_output = face_detection.predict(fd_frame)
-        inf_end = now()
-
-        fd_time += inf_end - inf_start
+        fd_time += now() - inf_start
         out_frame, faces = face_detection.preprocess_output(
-            fd_output, F, args.overlay_inference, args.probability_threshold
+            fd_output, F, args.overlay_inference
         )
 
         # TODO: trash FOR loop by accessing first element in "faces" directly
@@ -234,7 +231,7 @@ def infer(args, logging_enabled):
             fl_output = facial_landmark_detection.predict(fl_frame)
             fl_time += now() - fl_start
             out_frame, l_coord, r_coord, = facial_landmark_detection.preprocess_output(
-                fl_output, B, out_frame, args.overlay_inference, args.probability_threshold
+                fl_output, B, out_frame, args.overlay_inference
             )
 
             # Head Pose Estimation
@@ -243,7 +240,7 @@ def infer(args, logging_enabled):
             hp_output = head_pose_estimation.predict(hp_frame)
             hp_time += now() - hp_start
             out_frame, head_pose = head_pose_estimation.preprocess_output(
-                hp_output, out_frame, detected_face, B, args.overlay_inference, args.probability_threshold
+                hp_output, out_frame, detected_face, B, args.overlay_inference
             )
 
             # Gaze Estimation

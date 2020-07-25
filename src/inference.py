@@ -51,16 +51,15 @@ class Network:
         self.net = None
         self.plugin = None
         self.input_blob = None
-        self.out_blob = None
-        self.net_plugin = None
-        self.infer_request_handle = None
+        self.output_blob = None
+        self.exec_network = None
+        self.infer_request = None
 
     def load_model(
         self,
         model,
         device = "CPU",
         cpu_extension=None,
-        plugin=None,
     ):
         """
          Loads a network and an image to the Inference Engine plugin.
@@ -74,31 +73,28 @@ class Network:
         :return:  Shape of input layer
         """
 
-        model_xml = model
-        model_bin = os.path.splitext(model_xml)[0] + ".bin"
-        # Plugin initialization for specified device
-        # and load extensions library if specified
-        if not plugin:
-            log.info("Initializing plugin for {} device...".format(device))
-            self.plugin = IECore()
-        else:
-            self.plugin = plugin
+        model_bin = os.path.splitext(model)[0] + ".bin"
+        self.plugin = IECore()
 
         if cpu_extension and "CPU" in device:
-            self.plugin.add_cpu_extension(cpu_extension, device)
+            self.plugin.add_extension(cpu_extension, device)
 
         # Read IR
         log.info("Reading IR...")
-        self.net = self.plugin.read_network(model=model_xml, weights=model_bin)
+        self.net = self.plugin.read_network(model=model, weights=model_bin)
+
         log.info("Loading IR to the plugin...")
+        supported_layers = self.plugin.query_network(network=self.net, device_name=device)
+        unsupported_layers = [l for l in self.net.layers.keys() if l not in supported_layers]
+        if len(unsupported_layers) != 0:
+            print("Unsupported layers found: {}".format(unsupported_layers))
+            print("Check whether extensions are available to add to IECore.")
+            exit(1)
 
-
-        self.net = self.plugin.load_network(self.net, device)
+        self.exec_network = self.plugin.load_network(self.net, device)
         
         self.input_blob = next(iter(self.net.inputs))
-        self.out_blob = next(iter(self.net.outputs))
-
-        return self.plugin, self.get_input_shape()
+        self.output_blob = next(iter(self.net.outputs))
 
     def get_input_shape(self):
         """
@@ -117,15 +113,29 @@ class Network:
         perf_count = self.net_plugin.requests[request_id].get_perf_counts()
         return perf_count
 
-    def exec_net(self, frame):
+    def exec_network(self, input1, input2=None, input3=None):
         """
         Starts asynchronous inference for specified request.
         :param request_id: Index of Infer request value. Limited to device capabilities.
         :param frame: Input image
         :return: Instance of Executable Network class
         """
-        self.net.start_async(request_id=0, 
-                inputs={self.input_blob: frame})
+        inputiter = iter(self.net.inputs)
+
+        if(input2 is None and input3 is None):
+            self.exec_network.start_async(request_id=0, 
+                inputs={self.input_blob: input1})
+        elif(input3 is None):    
+            next(inputiter)#ignore first input
+            self.exec_network.start_async(request_id=0, 
+                inputs={self.input_blob: input1, next(inputiter):input2})
+        else:
+            next(inputiter)#ignore first input
+            self.exec_network.start_async(request_id=0, 
+                inputs={self.input_blob: input1, next(inputiter):input2, next(inputiter):input3})
+
+        return
+        
 
     def wait(self):
         """
@@ -133,7 +143,7 @@ class Network:
         :param request_id: Index of Infer request value. Limited to device capabilities.
         :return: Timeout value
         """
-        return self.net.requests[0].wait(-1)
+        return self.exec_network.requests[0].wait(-1)
 
     def get_output(self):
         """
@@ -142,7 +152,7 @@ class Network:
         :param output: Name of the output layer
         :return: Results for the specified request
         """
-        return self.net.requests[0].outputs
+        return self.exec_network.requests[0].outputs
 
     def clean(self):
         """

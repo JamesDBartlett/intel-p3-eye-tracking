@@ -52,7 +52,7 @@ class HeadPoseEstimation:
         return frame
 
     def preprocess_output(
-        self, outputs, image, face, box, overlay_inference, probability_threshold
+        self, outputs, image, face, box, overlay_inference
     ):
         """
             preprocess output image
