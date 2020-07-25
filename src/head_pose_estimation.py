@@ -14,7 +14,7 @@ class HeadPoseEstimation:
         Head Pose Estimation Class
     """
 
-    def __init__(self, model_name, device="CPU", extensions = None):
+    def __init__(self, model_name, device="CPU", extensions=None):
         """
             set instance variables
         """
@@ -51,7 +51,9 @@ class HeadPoseEstimation:
         frame = frame.reshape(1, *frame.shape)
         return frame
 
-    def preprocess_output(self, outputs):
+    def preprocess_output(
+        self, outputs, image, face, box, overlay_inference, probability_threshold
+    ):
         """
             preprocess output image
         """
