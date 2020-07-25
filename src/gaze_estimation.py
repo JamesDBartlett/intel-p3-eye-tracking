@@ -128,4 +128,3 @@ class GazeEstimation:
                     5,
                 )
         return img, [x, y, z]
-
