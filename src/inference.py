@@ -36,9 +36,8 @@ other than some basic formatting differences.
 
 import os
 import sys
-import time
 import logging as log
-from openvino.inference_engine import IENetwork, IECore
+from openvino.inference_engine import IECore, IENetwork
 
 
 class Network:
@@ -56,10 +55,7 @@ class Network:
         self.infer_request = None
 
     def load_model(
-        self,
-        model,
-        device = "CPU",
-        cpu_extension=None,
+        self, model, device="CPU", cpu_extension=None,
     ):
         """
          Loads a network and an image to the Inference Engine plugin.
@@ -73,7 +69,6 @@ class Network:
         :return:  Shape of input layer
         """
 
-        model_bin = os.path.splitext(model)[0] + ".bin"
         self.plugin = IECore()
 
         if cpu_extension and "CPU" in device:
@@ -81,20 +76,24 @@ class Network:
 
         # Read IR
         log.info("Reading IR...")
-        self.net = self.plugin.read_network(model=model, weights=model_bin)
+        self.net = self.plugin.read_network(model, os.path.splitext(model)[0] + ".bin")
 
         log.info("Loading IR to the plugin...")
-        supported_layers = self.plugin.query_network(network=self.net, device_name=device)
-        unsupported_layers = [l for l in self.net.layers.keys() if l not in supported_layers]
-        if len(unsupported_layers) != 0:
+        unsupported_layers = [
+            u
+            for u in self.net.layers.keys()
+            if u not in self.plugin.query_network(self.net, device)
+        ]
+        if len(unsupported_layers) >= 1:
             print("Unsupported layers found: {}".format(unsupported_layers))
-            print("Check whether extensions are available to add to IECore.")
             exit(1)
 
         self.exec_network = self.plugin.load_network(self.net, device)
-        
-        self.input_blob = next(iter(self.net.inputs))
-        self.output_blob = next(iter(self.net.outputs))
+
+        self.input_blob, self.output_blob = (
+            next(iter(self.net.inputs)),
+            next(iter(self.net.outputs)),
+        )
 
     def get_input_shape(self):
         """
@@ -110,32 +109,27 @@ class Network:
         :param request_id: Index of Infer request value. Limited to device capabilities
         :return: Performance of the layer  
         """
-        perf_count = self.net_plugin.requests[request_id].get_perf_counts()
-        return perf_count
+        return self.net_plugin.requests[request_id].get_perf_counts()
 
-    def exec_net(self, input1, input2=None, input3=None):
+    def exec_net(self, i, j=None, k=None):
         """
         Starts asynchronous inference for specified request.
         :param request_id: Index of Infer request value. Limited to device capabilities.
         :param frame: Input image
         :return: Instance of Executable Network class
         """
-        inputiter = iter(self.net.inputs)
+        Q = iter(self.net.inputs)
 
-        if(input2 is None and input3 is None):
-            self.exec_network.start_async(request_id=0, 
-                inputs={self.input_blob: input1})
-        elif(input3 is None):    
-            next(inputiter)#ignore first input
-            self.exec_network.start_async(request_id=0, 
-                inputs={self.input_blob: input1, next(inputiter):input2})
+        if j is None and k is None:
+            self.exec_network.start_async(0, {self.input_blob: i})
+        elif k is None:
+            next(Q)
+            self.exec_network.start_async(0, {self.input_blob: i, next(Q): j})
         else:
-            next(inputiter)#ignore first input
-            self.exec_network.start_async(request_id=0, 
-                inputs={self.input_blob: input1, next(inputiter):input2, next(inputiter):input3})
-
-        return
-        
+            next(Q)
+            self.exec_network.start_async(
+                0, {self.input_blob: i, next(Q): j, next(Q): k}
+            )
 
     def wait(self):
         """
