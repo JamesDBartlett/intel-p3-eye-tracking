@@ -204,7 +204,7 @@ def infer(args, logging_enabled):
 
     while loop:
         try:
-            F = next(feeder.next_batch())
+            frame = next(feeder.next_batch())
 
         except StopIteration:
             break
@@ -213,17 +213,17 @@ def infer(args, logging_enabled):
 
         frame_count += 1
 
-        fd_frame = face_detection.preprocess_input(F)
+        fd_frame = face_detection.preprocess_input(frame)
         inf_start = now()
         fd_output = face_detection.predict(fd_frame)
         fd_time += now() - inf_start
         out_frame, faces = face_detection.preprocess_output(
-            fd_output, F, args.overlay_inference
+            fd_output, frame, args.overlay_inference
         )
 
         # TODO: trash FOR loop by accessing first element in "faces" directly
         for B in faces:
-            detected_face = F[B[1] : B[3], B[0] : B[2]]
+            detected_face = frame[B[1]:B[3], B[0]:B[2]]
 
             # Facial Landmark Detection
             fl_frame = facial_landmark_detection.preprocess_input(detected_face)
@@ -248,7 +248,7 @@ def infer(args, logging_enabled):
                 out_frame, detected_face, l_coord, r_coord, args.overlay_inference
             )
             ge_start = now()
-            ge_output = gaze_estimation.predict(l_eye, r_eye, head_pose)
+            ge_output = gaze_estimation.predict(head_pose, l_eye, r_eye)
             ge_time += now() - ge_start
             out_frame, g_vec = gaze_estimation.preprocess_output(
                 ge_output, out_frame, B, l_coord, r_coord, args.overlay_inference

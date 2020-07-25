@@ -113,7 +113,7 @@ class Network:
         perf_count = self.net_plugin.requests[request_id].get_perf_counts()
         return perf_count
 
-    def exec_network(self, input1, input2=None, input3=None):
+    def exec_net(self, input1, input2=None, input3=None):
         """
         Starts asynchronous inference for specified request.
         :param request_id: Index of Infer request value. Limited to device capabilities.

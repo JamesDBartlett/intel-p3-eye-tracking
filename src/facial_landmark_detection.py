@@ -34,7 +34,7 @@ class FacialLandmarkDetection:
         """
         self.infer_network.exec_net(image)
         if(self.infer_network.wait() == 0):
-            return self.infer_network.get_output()[self.infer_network.out_blob]
+            return self.infer_network.get_output()[self.infer_network.output_blob]
 
 
     def check_model(self):
@@ -63,5 +63,4 @@ class FacialLandmarkDetection:
                 cv2.circle(img, (box[0]+x, box[1]+y), 30, (i*255, 255, 0), 2)
         lp = [w * landmarks[0], h * landmarks[1]]
         rp = [w * landmarks[2], h * landmarks[3]]
-        print(img, lp, rp)
         return img, lp, rp

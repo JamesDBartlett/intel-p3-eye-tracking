@@ -32,7 +32,7 @@ class FaceDetection:
         """
             run predictions on the input image
         """
-        self.infer_network.exec_network(image)
+        self.infer_network.exec_net(image)
         if self.infer_network.wait() == 0:
             return (self.infer_network.get_output())[self.infer_network.output_blob]
 

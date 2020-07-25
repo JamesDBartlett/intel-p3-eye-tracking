@@ -35,7 +35,7 @@ class HeadPoseEstimation:
         """
         self.infer_network.exec_net(image)
         if self.infer_network.wait() == 0:
-            return self.infer_network.get_output()[self.infer_network.out_blob]
+            return self.infer_network.get_output()
 
     def check_model(self):
         raise NotImplementedError
@@ -62,9 +62,9 @@ class HeadPoseEstimation:
 
         print(outputs)
 
-        yaw = outputs['angle_y_fc'][0][0]   # Axis of rotation: z
-        pitch = outputs['angle_p_fc'][0][0] # Axis of rotation: y
-        roll = outputs['angle_r_fc'][0][0] # Axis of rotation: x
+        yaw = outputs['angle_y_fc'][0][0]
+        pitch = outputs['angle_p_fc'][0][0]
+        roll = outputs['angle_r_fc'][0][0]
         
         #Draw output
         if(overlay_inference):
