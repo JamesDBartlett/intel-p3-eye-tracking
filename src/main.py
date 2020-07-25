@@ -244,17 +244,15 @@ def infer(args, logging_enabled):
             )
 
             # Gaze Estimation
-            ge_frame, l_eye, r_eye = gaze_estimation.preprocess_input(
-                ge_frame, l_coord, r_coord, args.overlay_inference
+            out_frame, l_eye, r_eye = gaze_estimation.preprocess_input(
+                out_frame, detected_face, l_coord, r_coord, args.overlay_inference
             )
             ge_start = now()
             ge_output = gaze_estimation.predict(l_eye, r_eye, head_pose)
             ge_time += now() - ge_start
             out_frame, g_vec = gaze_estimation.preprocess_output(
-                ge_output, B, l_coord, r_coord, args.overlay_inference
+                ge_output, out_frame, B, l_coord, r_coord, args.overlay_inference
             )
-
-            inf_end = now()
 
             if args.mouse_control:
                 mouse_control.move(g_vec[0], g_vec[1])
