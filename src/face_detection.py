@@ -13,9 +13,6 @@ class FaceDetection:
         Face Detection Class
     """
 
-    def now():
-        return time.time()
-
     def __init__(self, model_name, device="CPU", extensions=None):
         """
             set instance variables
@@ -64,8 +61,8 @@ class FaceDetection:
             box = outputs[0][0][i]
             confidence = box[2]
             if not confidence <= probability_threshold:
-                b = [xmin = int(w * box[3]), ymin = int(h * box[4]),
-                    xmax = int(w * box[5]), ymax = int(h * box[6])]
+                b = [int(w * box[3]), int(h * box[4]),
+                    int(w * box[5]), int(h * box[6])]
 
                 if(overlay_inference):
                     cv2.rectangle(img, (b[0], b[1]), (b[2], b[3]), (0, 255, 0), 1)

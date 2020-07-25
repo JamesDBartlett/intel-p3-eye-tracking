@@ -133,16 +133,15 @@ def log_model_load_times(logging_enabled, load_start, fl_start, ge_start, hp_sta
     if logging_enabled:
         logging.info("--------------------------------------------")
         logging.info("========= Model Loading Times (ms) =========")
-        logging.info("Face Detection: {:.2f}".format((now() - load_start)) / 0.001)
+        logging.info("Face Detection: {:.2f}".format((now() - load_start) / 0.001))
         logging.info(
-            "Facial Landmark Detection: {:.2f}".format((now() - fl_start)) / 0.001
-        )
-        logging.info("Gaze Estimation: {:.2f}".format((now() - ge_start)) / 0.001)
-        logging.info("Head Pose Estimation: {:.2f}".format((now() - hp_start)) / 0.001)
+            "Facial Landmark Detection: {:.2f}".format((now() - fl_start) / 0.001))
+        logging.info("Gaze Estimation: {:.2f}".format((now() - ge_start) / 0.001))
+        logging.info("Head Pose Estimation: {:.2f}".format((now() - hp_start) / 0.001))
         logging.info("____________________________________________")
         logging.info(
-            "Total Loading Time (All Models): {:.2f}".format((now() - load_start))
-            / 0.001
+            "Total Loading Time (All Models): {:.2f}".format((now() - load_start)
+            / 0.001)
         )
         logging.info("============================================")
         logging.info("                                            ")
@@ -218,10 +217,11 @@ def infer(args, logging_enabled):
         fd_frame = face_detection.preprocess_input(F)
         inf_start = now()
         fd_output = face_detection.predict(fd_frame)
+        inf_end = now()
 
         fd_time += inf_end - inf_start
         out_frame, faces = face_detection.preprocess_output(
-            fd_output, F, args.overlay_inference
+            fd_output, F, args.overlay_inference, args.probability_threshold
         )
 
         # TODO: trash FOR loop by accessing first element in "faces" directly
@@ -234,7 +234,7 @@ def infer(args, logging_enabled):
             fl_output = facial_landmark_detection.predict(fl_frame)
             fl_time += now() - fl_start
             out_frame, l_coord, r_coord, = facial_landmark_detection.preprocess_output(
-                fl_output, B, out_frame, args.overlay_inference
+                fl_output, B, out_frame, args.overlay_inference, args.probability_threshold
             )
 
             # Head Pose Estimation
@@ -243,7 +243,7 @@ def infer(args, logging_enabled):
             hp_output = head_pose_estimation.predict(hp_frame)
             hp_time += now() - hp_start
             out_frame, head_pose = head_pose_estimation.preprocess_output(
-                hp_output, out_frame, detected_face, B, args.overlay_inference
+                hp_output, out_frame, detected_face, B, args.overlay_inference, args.probability_threshold
             )
 
             # Gaze Estimation

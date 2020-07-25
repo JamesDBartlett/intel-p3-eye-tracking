@@ -59,8 +59,9 @@ class FacialLandmarkDetection:
         h, w = (box[3] - box[1], box[2] - box[0])
         if(overlay_inference):
             for i in range(2):
-                x, y = (w * int(landmarks[i*2]), h * int(landmarks[i*2+1])
-                cv2.circle(img, (box[0]+x, box[1]+y), 25, (i*255, 255, 0), 2)
+                x, y = (w * int(landmarks[i*2]), h * int(landmarks[i*2+1]))
+                cv2.circle(img, (box[0]+x, box[1]+y), 30, (i*255, 255, 0), 2)
         lp = [w * landmarks[0], h * landmarks[1]]
         rp = [w * landmarks[2], h * landmarks[3]]
+        print(img, lp, rp)
         return img, lp, rp

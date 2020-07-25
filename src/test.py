@@ -12,7 +12,9 @@
 # def xy_min_max(p, d, m, f):
 #     return(int(p + (d * m) // 2) if int(p + (d * m) // 2) >= f else 0)
 
-# f_shape = [300, 500]
+f_shape = [300, 500]
+x,y = f_shape[0:2]
+print(x,y)
 
 # l_coords = [100, 150]
 # r_coords = [200, 250]
