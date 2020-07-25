@@ -134,13 +134,15 @@ def log_model_load_times(logging_enabled, load_start, fl_start, ge_start, hp_sta
         logging.info("========= Model Loading Times (ms) =========")
         logging.info("Face Detection: {:.2f}".format((now() - load_start) / 0.001))
         logging.info(
-            "Facial Landmark Detection: {:.2f}".format((now() - fl_start) / 0.001))
+            "Facial Landmark Detection: {:.2f}".format((now() - fl_start) / 0.001)
+        )
         logging.info("Gaze Estimation: {:.2f}".format((now() - ge_start) / 0.001))
         logging.info("Head Pose Estimation: {:.2f}".format((now() - hp_start) / 0.001))
         logging.info("____________________________________________")
         logging.info(
-            "Total Loading Time (All Models): {:.2f}".format((now() - load_start)
-            / 0.001)
+            "Total Loading Time (All Models): {:.2f}".format(
+                (now() - load_start) / 0.001
+            )
         )
         logging.info("============================================")
         logging.info("                                            ")
@@ -169,8 +171,8 @@ def log_inference_times(
 def user_quit(logging_enabled):
     """
         if logging is enabled, log the user_quit message.
-    """    
-    if(logging_enabled):
+    """
+    if logging_enabled:
         logging.info("User pressed Esc or Q key. Quitting...")
 
 
@@ -183,7 +185,6 @@ def infer(args, logging_enabled):
     facial_landmark_detection = FacialLandmarkDetection(args.facial_landmark_detection)
     gaze_estimation = GazeEstimation(args.gaze_estimation)
     head_pose_estimation = HeadPoseEstimation(args.head_pose_estimation)
-
     load_start = now()
     face_detection.load_model()
     fl_start = now()
@@ -192,85 +193,62 @@ def infer(args, logging_enabled):
     gaze_estimation.load_model()
     hp_start = now()
     head_pose_estimation.load_model()
-
     log_model_load_times(logging_enabled, load_start, fl_start, ge_start, hp_start)
-
     feeder = InputFeeder("video", args.input)
     feeder.load_data()
-
     frame_count, fd_time, fl_time, ge_time, hp_time = [0] * 5
-
-    loop = True
-
-    while loop:
+    while 1:
         try:
             frame = next(feeder.next_batch())
-
         except StopIteration:
             break
-
-        key = cv2.waitKey(100)
-
+        key = cv2.waitKey(60)
         frame_count += 1
-
         fd_frame = face_detection.preprocess_input(frame)
         inf_start = now()
         fd_output = face_detection.predict(fd_frame)
         fd_time += now() - inf_start
         out_frame, faces = face_detection.preprocess_output(
-            fd_output, frame, args.overlay_inference
+            fd_output, frame, args.overlay_inference, args.probability_threshold
         )
-
-        # TODO: trash FOR loop by accessing first element in "faces" directly
-        for B in faces:
-            detected_face = frame[B[1]:B[3], B[0]:B[2]]
-
-            # Facial Landmark Detection
-            fl_frame = facial_landmark_detection.preprocess_input(detected_face)
-            fl_start = now()
-            fl_output = facial_landmark_detection.predict(fl_frame)
-            fl_time += now() - fl_start
-            out_frame, l_coord, r_coord, = facial_landmark_detection.preprocess_output(
-                fl_output, B, out_frame, args.overlay_inference
+        detected_face = frame[faces[0][1] : faces[0][3], faces[0][0] : faces[0][2]]
+        fl_frame = facial_landmark_detection.preprocess_input(detected_face)
+        fl_start = now()
+        fl_output = facial_landmark_detection.predict(fl_frame)
+        fl_time += now() - fl_start
+        out_frame, l_coord, r_coord, = facial_landmark_detection.preprocess_output(
+            fl_output, faces[0], out_frame, args.overlay_inference
+        )
+        hp_frame = head_pose_estimation.preprocess_input(detected_face)
+        hp_start = now()
+        hp_output = head_pose_estimation.predict(hp_frame)
+        hp_time += now() - hp_start
+        out_frame, head_pose = head_pose_estimation.preprocess_output(
+            hp_output, out_frame, detected_face, faces[0], args.overlay_inference
+        )
+        out_frame, l_eye, r_eye = gaze_estimation.preprocess_input(
+            out_frame, detected_face, l_coord, r_coord, args.overlay_inference
+        )
+        ge_start = now()
+        ge_output = gaze_estimation.predict(head_pose, l_eye, r_eye)
+        ge_time += now() - ge_start
+        out_frame, g_vec = gaze_estimation.preprocess_output(
+            ge_output, out_frame, faces[0], l_coord, r_coord, args.overlay_inference
+        )
+        if args.mouse_control:
+            mouse_control.move(g_vec[0], g_vec[1])
+        if args.video_window:
+            cv2.imshow(
+                "Computer-Human Interface Peripheral Signal Manipulation via AI Retina Tracking (CHIPSMART)",
+                out_frame,
             )
-
-            # Head Pose Estimation
-            hp_frame = head_pose_estimation.preprocess_input(detected_face)
-            hp_start = now()
-            hp_output = head_pose_estimation.predict(hp_frame)
-            hp_time += now() - hp_start
-            out_frame, head_pose = head_pose_estimation.preprocess_output(
-                hp_output, out_frame, detected_face, B, args.overlay_inference
-            )
-
-            # Gaze Estimation
-            out_frame, l_eye, r_eye = gaze_estimation.preprocess_input(
-                out_frame, detected_face, l_coord, r_coord, args.overlay_inference
-            )
-            ge_start = now()
-            ge_output = gaze_estimation.predict(head_pose, l_eye, r_eye)
-            ge_time += now() - ge_start
-            out_frame, g_vec = gaze_estimation.preprocess_output(
-                ge_output, out_frame, B, l_coord, r_coord, args.overlay_inference
-            )
-
-            if args.mouse_control:
-                mouse_control.move(g_vec[0], g_vec[1])
-
-            if args.video_window:
-                cv2.imshow("C.H.I.P.S.M.A.R.T.", out_frame)
-
-            break
-
         # Quit if user presses Esc or Q
         if key in (27, 81):
             user_quit(logging_enabled)
             break
-
     log_inference_times(
         logging_enabled, frame_count, fd_time, fl_time, ge_time, hp_time
     )
-
     feeder.close()
     cv2.destroyAllWindows()
     quit()
@@ -286,7 +264,6 @@ def run_inference(args):
         datefmt="%Y-%m-%d %H:%M:%S %Z",
         handlers=[logging.FileHandler(args.logfile), logging.StreamHandler()],
     )
-
     if len(args.logfile) > 0:
         print("Logfile: " + args.logfile)
         try:
@@ -303,7 +280,6 @@ def main():
         Get args from input & pass them to run_inference()
     """
     args = setup_argparser().parse_args()
-
     run_inference(args)
 
 

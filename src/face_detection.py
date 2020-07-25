@@ -13,11 +13,11 @@ class FaceDetection:
         Face Detection Class
     """
 
-    def __init__(self, model_name, device="CPU", extensions=None):
+    def __init__(self, model, device="CPU", extensions=None):
         """
             set instance variables
         """
-        self.model_xml = model_name
+        self.model_xml = model
         self.device = device
         self.extensions = extensions
         self.infer_network = Network()
@@ -33,11 +33,11 @@ class FaceDetection:
             run predictions on the input image
         """
         self.infer_network.exec_net(image)
-        if self.infer_network.wait() == 0:
-            return (self.infer_network.get_output())[self.infer_network.output_blob]
-
-    def check_model(self):
-        raise NotImplementedError
+        return (
+            self.infer_network.get_output()[self.infer_network.output_blob]
+            if self.infer_network.wait() == 0
+            else None
+        )
 
     def preprocess_input(self, image):
         """
@@ -50,21 +50,18 @@ class FaceDetection:
         frame = frame.reshape(1, *frame.shape)
         return frame
 
-    def preprocess_output(self, outputs, img, overlay_inference, probability_threshold = 0.5):
+    def preprocess_output(self, outputs, img, overlay_inference, probability_threshold):
         """
             preprocess output image
         """
         h, w = img.shape[0:2]
         boxes = []
-
-        for i in range(len(outputs[0][0])):
-            box = outputs[0][0][i]
+        for a in range(len(outputs[0][0])):
+            box = outputs[0][0][a]
             confidence = box[2]
             if not confidence <= probability_threshold:
-                b = [int(w * box[3]), int(h * box[4]),
-                    int(w * box[5]), int(h * box[6])]
-
-                if(overlay_inference):
+                b = [int(w * box[3]), int(h * box[4]), int(w * box[5]), int(h * box[6])]
+                if overlay_inference:
                     cv2.rectangle(img, (b[0], b[1]), (b[2], b[3]), (0, 255, 0), 1)
                 boxes.append([b[0], b[1], b[2], b[3]])
         return img, boxes

@@ -13,12 +13,12 @@ class FacialLandmarkDetection:
         Facial Landmark Detection Class
     """
 
-    def __init__(self, model_name, device="CPU", extensions = None):
+    def __init__(self, model, device="CPU", extensions=None):
         """
             set instance variables
         """
-        self.model_xml = model_name
-        self.device =  device
+        self.model_xml = model
+        self.device = device
         self.extensions = extensions
         self.infer_network = Network()
 
@@ -33,12 +33,11 @@ class FacialLandmarkDetection:
             run predictions on the input image
         """
         self.infer_network.exec_net(image)
-        if(self.infer_network.wait() == 0):
-            return self.infer_network.get_output()[self.infer_network.output_blob]
-
-
-    def check_model(self):
-        raise NotImplementedError
+        return (
+            self.infer_network.get_output()[self.infer_network.output_blob]
+            if self.infer_network.wait() == 0
+            else None
+        )
 
     def preprocess_input(self, image):
         """
@@ -46,21 +45,22 @@ class FacialLandmarkDetection:
         """
         input_shape = self.infer_network.get_input_shape()
         frame = np.copy(image)
-        frame = cv2.resize(frame, (input_shape[3], input_shape[2]))
-        frame = frame.transpose((2, 0, 1))
-        frame = frame.reshape(1, *frame.shape)
-        return frame
+        frame = cv2.resize(frame, (input_shape[3], input_shape[2])).transpose((2, 0, 1))
+        return frame.reshape(1, *frame.shape)
 
     def preprocess_output(self, outputs, box, img, overlay_inference):
         """
             preprocess output image
         """
-        landmarks = outputs.reshape(1,10)[0]
+        landmarks = outputs.reshape(1, 10)[0]
         h, w = (box[3] - box[1], box[2] - box[0])
-        if(overlay_inference):
-            for i in range(2):
-                x, y = (w * int(landmarks[i*2]), h * int(landmarks[i*2+1]))
-                cv2.circle(img, (box[0]+x, box[1]+y), 30, (i*255, 255, 0), 2)
-        lp = [w * landmarks[0], h * landmarks[1]]
-        rp = [w * landmarks[2], h * landmarks[3]]
-        return img, lp, rp
+        if overlay_inference:
+            for e in range(2):
+                x, y = (w * int(landmarks[e * 2]), h * int(landmarks[e * 2 + 1]))
+                cv2.circle(img, (box[0] + x, box[1] + y), 30, (0, 255, e * 255), 2)
+        return (
+            img,
+            [w * landmarks[0], h * landmarks[1]],
+            [w * landmarks[2], h * landmarks[3]],
+        )
+
