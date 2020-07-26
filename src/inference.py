@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 
-
 """
-NOTE TO UDACITY MENTORS:
-This file is based primarily on the inference.py found in the official Intel IoT Devkit "People Counter Python" repo on GitHub:
-https://github.com/intel-iot-devkit/people-counter-python/blob/master/inference.py
-
-Very little was needed in the way of changes to this file, so it bears close resemblance to its original source,
-other than some basic formatting differences. 
+    NOTE TO UDACITY MENTORS:
+    This file is based primarily on the inference.py found in the official Intel IoT Devkit "People Counter Python" repo on GitHub:
+    https://github.com/intel-iot-devkit/people-counter-python/blob/master/inference.py
 """
 
 
@@ -68,7 +64,7 @@ class Network:
         :param plugin: Plugin for specified device
         :return:  Shape of input layer
         """
-
+        model_base = os.path.splitext(model)[0]
         self.plugin = IECore()
 
         if cpu_extension and "CPU" in device:
@@ -76,16 +72,14 @@ class Network:
 
         # Read IR
         log.info("Reading IR...")
-        self.net = self.plugin.read_network(model, os.path.splitext(model)[0] + ".bin")
-
-        log.info("Loading IR to the plugin...")
+        self.net = self.plugin.read_network(model, model_base + ".bin")
+        supported_layers = self.plugin.query_network(self.net, device)
+        log.info("Loading {} into IECore...".format(model_base.split("/")[-1]))
         unsupported_layers = [
-            u
-            for u in self.net.layers.keys()
-            if u not in self.plugin.query_network(self.net, device)
+            u for u in self.net.layers.keys() if u not in supported_layers
         ]
-        if len(unsupported_layers) >= 1:
-            print("Unsupported layers found: {}".format(unsupported_layers))
+        if len(unsupported_layers) > 0:
+            log.info("Unsupported layers found: {}".format(unsupported_layers))
             exit(1)
 
         self.exec_network = self.plugin.load_network(self.net, device)
