@@ -7,9 +7,10 @@ python3 src/main.py \
         --head_pose_estimation models/intel/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.xml \
         --input media/demo.mp4 \
         --device CPU \
-        --probability_threshold 0.5 \
+        --probability_threshold 0.7 \
         --logfile "main.log" \
         --overlay_inference \
-        --video_window # --mouse_control
+        --video_window \
+        --mouse_control
 
 # HETERO:MYRIAD,CPU
