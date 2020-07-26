@@ -54,10 +54,14 @@ class FacialLandmarkDetection:
         """
         landmarks = outputs.reshape(1, 10)[0]
         h, w = (box[3] - box[1], box[2] - box[0])
+
+        # This is broken, but I can't figure out why...
+        overlay_inference = False # ...so I've disabled it for now.
         if overlay_inference:
             for e in range(2):
                 x, y = (w * int(landmarks[e * 2]), h * int(landmarks[e * 2 + 1]))
                 cv2.circle(img, (box[0] + x, box[1] + y), 30, (0, 255, e * 255), 2)
+
         return (
             img,
             [w * landmarks[0], h * landmarks[1]],
