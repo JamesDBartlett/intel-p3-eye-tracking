@@ -12,8 +12,8 @@ import pyautogui
 
 class MouseController:
     def __init__(self, precision, speed):
-        precision_dict = {"high": 100, "low": 1000, "medium": 500}
-        speed_dict = {"fast": 1, "slow": 10, "medium": 5}
+        precision_dict = {"lower": 2500, "low": 1000, "medium": 500, "high": 100}
+        speed_dict = {"faster": 0.5, "fast": 1, "medium": 5, "slow": 10}
 
         self.precision = precision_dict[precision]
         self.speed = speed_dict[speed]
@@ -22,3 +22,7 @@ class MouseController:
         pyautogui.moveRel(
             x * self.precision, -1 * y * self.precision, duration=self.speed
         )
+
+    def center(self):
+        xmax, ymax = pyautogui.size()
+        pyautogui.moveTo(xmax / 2, ymax / 2)
