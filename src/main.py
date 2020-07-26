@@ -240,7 +240,7 @@ def infer(args, logging_enabled):
                 "Computer-Human Interface Peripheral Signal Manipulation via AI Retina Tracking (CHIPSMART)",
                 out_frame,
             )
-        if args.mouse_control and frame_count % 12 == 0:
+        if args.mouse_control and frame_count % 6 == 0:
             mouse_control.move(g_vec[0], g_vec[1])
         # Quit if user presses Esc or Q
         if key in (27, 81):
