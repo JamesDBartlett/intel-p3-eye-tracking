@@ -1,4 +1,6 @@
 {
     "python.formatting.provider": "black",
-    "python.pythonPath": "/home/james/.pyenv/versions/3.7.6/bin/python"
+    "python.pythonPath": "/home/james/.pyenv/versions/3.7.6/bin/python",
+    "python.linting.banditEnabled": true,
+    "python.linting.enabled": true
 }
