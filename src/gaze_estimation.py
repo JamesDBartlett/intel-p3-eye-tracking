@@ -70,7 +70,7 @@ class GazeEstimation:
         """
             preprocess input image
         """
-        l_shape = r_shape = [1, 3, 45, 45]
+        l_shape = r_shape = [1, 3, 60, 60]
         l_image, r_image, l_frame, r_frame = [None] * 4
         eyes = (
             [l_coords, l_shape, l_image, 20, l_frame],
