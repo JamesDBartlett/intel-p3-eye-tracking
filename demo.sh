@@ -6,9 +6,10 @@ python3 src/main.py \
         --gaze_estimation models/intel/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.xml \
         --head_pose_estimation models/intel/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.xml \
         --input media/demo.mp4 \
-        --device HETERO:MYRIAD,CPU \
+        --device CPU \
         --probability_threshold 0.5 \
         --logfile "main.log" \
         --overlay_inference \
         --video_window # --mouse_control
-        
+
+# HETERO:MYRIAD,CPU
