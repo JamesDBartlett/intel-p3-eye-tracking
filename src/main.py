@@ -120,6 +120,7 @@ def setup_argparser():
     )
     return argparser
 
+mouse_control = MouseController("low", "fast")
 
 def now():
     return time.time()
@@ -180,7 +181,6 @@ def infer(args, logging_enabled):
     """
         run inference on input video, display/save output video
     """
-    mouse_control = MouseController("medium", "slow")
     face_detection = FaceDetection(args.face_detection)
     facial_landmark_detection = FacialLandmarkDetection(args.facial_landmark_detection)
     gaze_estimation = GazeEstimation(args.gaze_estimation)
@@ -198,11 +198,11 @@ def infer(args, logging_enabled):
     feeder.load_data()
     frame_count, fd_time, fl_time, ge_time, hp_time = [0] * 5
     while 1:
+        key = cv2.waitKey(20)
         try:
             frame = next(feeder.next_batch())
         except StopIteration:
             break
-        key = cv2.waitKey(60)
         frame_count += 1
         fd_frame = face_detection.preprocess_input(frame)
         inf_start = now()
@@ -235,13 +235,13 @@ def infer(args, logging_enabled):
         out_frame, g_vec = gaze_estimation.preprocess_output(
             ge_output, out_frame, faces[0], l_coord, r_coord, args.overlay_inference
         )
-        if args.mouse_control:
-            mouse_control.move(g_vec[0], g_vec[1])
         if args.video_window:
             cv2.imshow(
                 "Computer-Human Interface Peripheral Signal Manipulation via AI Retina Tracking (CHIPSMART)",
                 out_frame,
             )
+        if args.mouse_control and frame_count % 12 == 0:
+            mouse_control.move(g_vec[0], g_vec[1])
         # Quit if user presses Esc or Q
         if key in (27, 81):
             user_quit(logging_enabled)
@@ -264,6 +264,9 @@ def run_inference(args):
         datefmt="%Y-%m-%d %H:%M:%S %Z",
         handlers=[logging.FileHandler(args.logfile), logging.StreamHandler()],
     )
+    if args.mouse_control:
+        mouse_control.center()
+
     if len(args.logfile) > 0:
         print("Logfile: " + args.logfile)
         try:
