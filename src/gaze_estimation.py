@@ -6,16 +6,16 @@ import cv2
 import time
 import numpy as np
 from inference import Network
-from utility import color, axes_misc
+from utility import color, axes_misc, bgr
 
 
 def print_coords(img, axis_name, axis_value, color):
     cv2.putText(
         img,
-        axis_name + str("{:.1f}".format(axis_value * axes_misc[axis_name][1])),
-        (20, axes_misc[list(axes_misc.keys())[0]][1]),
+        axis_name + str("{:.2f}".format(axis_value * axes_misc[axis_name][1])),
+        (axes_misc[axis_name][0], axes_misc[axis_name][1]+75),
         0,
-        0.6,
+        0.8,
         color,
         1,
     )
@@ -23,16 +23,15 @@ def print_coords(img, axis_name, axis_value, color):
 
 def arrowed_line(img, x, y, qx, qy):
     cv2.arrowedLine(
-        img,
-        (qx, qy),
-        (qx + int(x * 100), qy + int(-100 * y)),
-        list(color.values())[2],
-        5,
+        img, (qx, qy), (qx + int(x * 100), qy + int(-100 * y)), bgr("M"), 5,
     )
 
 
 def xy_min_max(p, d, m, f):
-    return int(p + (d * m) // 2) if int(p + (d * m) // 2) >= f else f
+    if f == 0:
+        return int(p + (d * m) // 2) if int(p + (d * m) // 2) >= f else f
+    else:
+        return int(p + (d * m) // 2) if int(p + (d * m) // 2) <= f else f
 
 
 class GazeEstimation:
@@ -70,7 +69,7 @@ class GazeEstimation:
         """
             preprocess input image
         """
-        l_shape = r_shape = [1, 3, 60, 60]
+        l_shape, r_shape = [[1, 3, 60, 60]] * 2
         l_image, r_image, l_frame, r_frame = [None] * 4
         eyes = (
             [l_coords, l_shape, l_image, 20, l_frame],
@@ -114,7 +113,9 @@ class GazeEstimation:
             for axis in [x, y, z]:
                 for j in axes_misc.keys():
                     for k in color.keys():
-                        print_coords(img, j, axis, color[k])
+                        dummy = k
+                        # This is broken, but I can't figure out why:
+                        #print_coords(img, j, axis, color[k])
                 arrowed_line(img, x, y, lx, ly)
                 arrowed_line(img, x, y, rx, ry)
         return img, [x, y, z]
