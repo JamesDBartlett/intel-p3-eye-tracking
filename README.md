@@ -26,13 +26,16 @@ The Intel® hardware I benchmarked with:
 - [Intel® Core™ i3-3110M Processor (Dual-Core, 3M Cache, 2.40 GHz)](https://ark.intel.com/content/www/us/en/ark/products/65700/intel-core-i3-3110m-processor-3m-cache-2-40-ghz.html)
 
 ## Results
-*TODO*
+  
+Model Loading Times (ms) 
+- Face Detection: 1117.04  
+- Facial Landmark Detection: 443.23  
+- Gaze Estimation: 326.16  
+- Head Pose Estimation: 145.82  
+- Total Loading Time (All Models): 1117.99  
 
-## Stand-Out Stuff
-*TODO*
-
-### Async Inference
-If you have used Async Inference in your code, benchmark the results and explain its effects on power and performance of your project.
-
-### Edge Cases
-There will be certain situations that will break your inference flow. For instance, lighting changes or multiple people in the frame. Explain some of the edge cases you encountered in your project and how you solved them to make your project more robust.
+Model Inference Times (ms)
+- Face Detection: 102.60  
+- Facial Landmark Detection: 1.55  
+- Gaze Estimation: 9.10  
+- Head Pose Estimation: 7.14  
