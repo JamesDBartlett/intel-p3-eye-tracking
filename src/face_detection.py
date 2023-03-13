@@ -1,6 +1,6 @@
 """
     face_detection.py
-    Author: @JamesDBartlett3
+    Author: @JamesDBartlett3@techhub.social
 """
 import cv2
 import time
