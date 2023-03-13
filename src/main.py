@@ -1,6 +1,6 @@
 """
     main.py
-    Author: @JamesDBartlett3
+    Author: @JamesDBartlett3@techhub.social
 """
 
 # Import official libraries

@@ -1,6 +1,6 @@
 """
     gaze_estimation.py
-    Author: @JamesDBartlett3
+    Author: @JamesDBartlett3@techhub.social
 """
 import cv2
 import time
