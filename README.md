@@ -11,7 +11,7 @@ Requires:
   - [Ubuntu 18.04.4 LTS (Bionic Beaver)](https://releases.ubuntu.com/18.04/)
   - [Python 3.7.6](https://docs.python.org/release/3.7.6/)
   - [Intel® Distribution of OpenVINO Toolkit 2020.3](https://software.intel.com/content/www/us/en/develop/articles/openvino-2020-3-lts-relnotes.html) [(LTS)](https://software.intel.com/content/www/us/en/develop/articles/openvino-long-term-support-release.html)
-  - [This repository](https://github.com/JamesDBartlett/intel-p3-eye-tracking), cloned to a local directory
+  - [This repository](https://github.com/JamesDBartlett3/intel-p3-eye-tracking), cloned to a local directory
 
 ## Demo
 To run this project, simply execute the script titled `demo.sh` in the root directory of this repository:  
